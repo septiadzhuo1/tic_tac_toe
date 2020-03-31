@@ -1,90 +1,209 @@
-const textDisplay = document.querySelector('.message');
-const winningConditions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-];
+document.addEventListener('DOMContentLoaded', function() {
 
-let playable = true;
+    var optionsButton = document.getElementById("options_submit");
+    var widthLayout = 0;
 
-let currentPlayer = "X";
+    optionsButton.addEventListener("click", function(){
 
-let gameState = ["", "", "", "", "", "", "", "", ""];
+    optionsButton.innerHTML = "Reset";
 
-const winningMessage = () => `<div class=${currentPlayer}>Player ${currentPlayer} has won!</di>`;
-const drawMessage = () => `Game ended in a draw!`;
-const currentPlayerTurn = () => `It's ${currentPlayer}'s turn`;
+    function isEven(value){
+        if (value % 2 == 0) {
+            return true;
+        } else {
+            return false;
+        };
+    };
 
-textDisplay.innerHTML = currentPlayerTurn();
-function handleCellPlayed(clickedCell, clickedCellIndex) {
-    gameState[clickedCellIndex] = currentPlayer;
-    clickedCell.innerHTML = `<div class=${currentPlayer}>${currentPlayer}</div>`;
-}
-function handlePlayerChange() {
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-    textDisplay.innerHTML = currentPlayerTurn();
-}
-function handleResultValidation() {
-    let roundWon = false;
-    let winningConditionsLength = winningConditions.length - 1;
-    for (let i = 0; i <= winningConditionsLength; i++) {
-        const winCondition = winningConditions[i];
-        let a = gameState[winCondition[0]];
-        let b = gameState[winCondition[1]];
-        let c = gameState[winCondition[2]];
+    function isOdd(value){
+        if (value % 1 == 0) {
+            return true;
+        } else {
+            return false;
+        };
+    };
 
-
-        if (a === '' || b === '' || c === '') {
-            continue;
-        }
-        if (a === b && b === c) {
-            roundWon = true;
-            break
-        }
-    }
-    if (roundWon) {
-        textDisplay.innerHTML = winningMessage();
-        playable = false;
-        return;
-    }
+    function allSame(array) { 
     
-    let roundDraw = !gameState.includes("");
-    if (roundDraw) {
-        textDisplay.innerHTML = drawMessage();
-        playable = false;
-        return;
+        var first = array[0];
+
+        if (array[0] == "") {
+            return false;
+        } else {
+            return array.every(function(element) {
+                return element == first;
+            });
+        };
+    };
+
+    
+    var boardSize = parseInt(document.getElementById("boardsize_input").value);
+
+    var gameBoard = [];
+
+    var numCells = (boardSize * boardSize);
+
+    for (var i = 0; i < numCells; i++) {
+        gameBoard.push(i);
+    };
+    var cellClicks = [];
+
+    for (var i = 0; i < numCells; i++) {
+        cellClicks[i] = 0;
+    };
+    document.getElementById("game").innerHTML = '<div id="board"></div>';
+    
+    var checkDevice = window.matchMedia("(max-width: 620px)");
+    
+    widthLayout = checkDevice.matches == true ? "300": "600";
+
+    var board = document.getElementById("board");
+
+    board.style.margin = '0 auto';
+
+    board.style.height = ((widthLayout/boardSize) * boardSize)+boardSize*2 + 'px';
+    board.style.width = ((widthLayout/boardSize) * boardSize)+boardSize*2 +'px';
+
+
+    for (var i = 0; i < numCells; i++) {
+        board.innerHTML += '<div class="cell"></div>'; 
+    };
+    
+    var Cells = document.getElementsByClassName("cell");
+
+    for (var i = 0; i < numCells; i++) {
+        Cells[i].style.height = widthLayout/boardSize +"px";
+        Cells[i].style.width =  widthLayout/boardSize +"px";
+        Cells[i].style.float = "left";
+    
+        Cells[i].setAttribute("id", i.toString());
+    };
+
+    function draw(){
+        var checkDraw = 0;
+        var cell = document.getElementsByClassName("cell");
+        for(var i = 0; i < cell.length; i++){
+            if (cell[i].innerText !=""){
+                checkDraw++;
+            }
+        }
+        if (checkDraw == numCells){
+            return true;
+        } else {
+            return false;
+        }
     }
-   
-    handlePlayerChange();
 
-}
-function handleCellClick(clickedCellEvent ) {
-    const clickedCell = clickedCellEvent.target;
+    var statusDisplay = document.getElementById("statusDisplay")
+    currentPlayer = "X"
+    statusDisplay.style.color = "black";
+    messsageDisplay = `<div class='${currentPlayer}'>${currentPlayer}'s Turn</div>`;
+    statusDisplay.innerHTML = messsageDisplay;
 
-    const clickedCellIndex = parseInt(
-      clickedCell.getAttribute('cell-index')
-    );
+    var boardClicks = 0;
 
-    if (gameState[clickedCellIndex] !== "" || !playable) {
-        return;
-    }
+    board.addEventListener("click", function() {
+        if (determineWinner()) { 
+            statusDisplay.style.color = winningPlayer[0] == "X" ? "red": "blue";
+            statusDisplay.innerHTML = winningPlayer[0] + ' wins!';
+        } else {
+            if (draw()){
+                statusDisplay.style.color="green";
+                statusDisplay.innerHTML="This game ended draw";
+                return false;
+            } else {
+                messsageDisplay = `<div class='${currentPlayer}'>${currentPlayer}'s Turn</div>`;
+                statusDisplay.innerHTML = messsageDisplay;
+            }
+            
+        }
 
-    handleCellPlayed(clickedCell, clickedCellIndex);
-    handleResultValidation();
-}
-function handleRestartGame() {
-    playable = true;
-    currentPlayer = "X";
-    gameState = ["", "", "", "", "", "", "", "", ""];
-    textDisplay.innerHTML = currentPlayerTurn();
-    document.querySelectorAll('.cell')
-               .forEach(cell => cell.innerHTML = "");
-}
+        boardClicks++;
+    }); 
 
-document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
-document.querySelector('.restart').addEventListener('click', handleRestartGame);
+    
+
+    var winningPlayer;
+
+    var determineWinner = function() {
+        
+        for (i = 0; i < numCells; i += 1) { 
+            if ((i % boardSize) == 0) {
+                var rowCheck = [];
+                for (var cellNum = i; cellNum < (i + boardSize); cellNum += 1) { 
+                    rowCheck.push(Cells[cellNum].innerText);
+                };
+
+                if (allSame(rowCheck)) {
+                    winningPlayer = rowCheck; 
+                    return true;
+                };
+            };
+        };
+        for (i = 0; i < numCells; i += 1) { 
+            if (i < boardSize) { // 
+                var colCheck = [];
+                for (var cellNum = i; cellNum < numCells; cellNum += boardSize) { 
+                    colCheck.push(Cells[cellNum].innerText);
+                };
+                
+                if (allSame(colCheck)) {
+                    winningPlayer = colCheck; 
+                    return true;
+                };	
+            };
+        };
+        var diag1Check = []; 
+        for (i = 0; i < numCells; i += 1) { 
+            if ((i % (boardSize + 1)) == 0) { 
+                diag1Check.push(Cells[i].innerText);
+            };
+        };
+        if (allSame(diag1Check)) { 
+            winningPlayer = diag1Check; 
+            return true;
+        };
+        var diag2Check = []; 
+        for (i = (boardSize - 1); i < (numCells - 1); i += 1) { 
+            if ((i % (boardSize - 1)) == 0) { 
+                diag2Check.push(Cells[i].innerText);
+            };
+        };
+        if (allSame(diag2Check)) { 
+            winningPlayer = diag2Check; 
+            return true;
+        } ;
+    }; 
+
+    var countClicks = function() {
+        var divID = this.getAttribute("id");
+        cellClicks[divID] += 1;
+        if (isEven(boardClicks) && cellClicks[divID] == 1) {
+            this.innerHTML = `<div class='${currentPlayer}'>${currentPlayer}</div>`;
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+
+        } else if (isOdd(boardClicks) && cellClicks[divID] == 1) {
+            this.innerHTML = `<div class='${currentPlayer}'>${currentPlayer}</div>`;
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+        } else if (!determineWinner()){
+            boardClicks -= 1;
+        } else {
+        };
+        if (determineWinner()) { 
+            for (var i = 0; i < numCells; i++) {
+                cellClicks[i] = 2;
+            };
+            document.getElementById("options_submit").innerHTML = "Play again?"
+        };
+    };
+
+    for (var i = 0; i < numCells; i++) {
+        Cells[i].addEventListener("click", countClicks);
+    };
+
+    }); 
+
+}); 
+
+
+

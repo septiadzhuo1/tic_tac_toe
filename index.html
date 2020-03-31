@@ -10,20 +10,21 @@
 </head>
 <body>
     <section>
-        <h1 class="title">Tic Tac Toe</h1>
-        <div class="board">
-            <div cell-index="0" class="cell"></div>
-            <div cell-index="1" class="cell"></div>
-            <div cell-index="2" class="cell"></div>
-            <div cell-index="3" class="cell"></div>
-            <div cell-index="4" class="cell"></div>
-            <div cell-index="5" class="cell"></div>
-            <div cell-index="6" class="cell"></div>
-            <div cell-index="7" class="cell"></div>
-            <div cell-index="8" class="cell"></div>
+        <div id="header">
+            <h1>Tic Tac Toe Game</h1>
+            <h3></h3>
         </div>
-        <h2 class="message"></h2>
-        <button class="restart">Restart Game</button>
+                <label for="boardsize_input">Board Size:</label>
+                    <input id="boardsize_input" type="number" min="2" max="50" value="3"></input>
+                
+            <button id="options_submit">Play!</button>
+        </div>
+        <br>
+        <br>
+        <div id="statusDisplay"></div>
+        <br>
+        <div id="game">
+        </div>
     </section>
 <script src="script.js"></script>
 </body>
