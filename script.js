@@ -16,7 +16,7 @@ let currentPlayer = "X";
 
 let gameState = ["", "", "", "", "", "", "", "", ""];
 
-const winningMessage = () => `Player ${currentPlayer} has won!`;
+const winningMessage = () => `<div class=${currentPlayer}>Player ${currentPlayer} has won!</di>`;
 const drawMessage = () => `Game ended in a draw!`;
 const currentPlayerTurn = () => `It's ${currentPlayer}'s turn`;
 
